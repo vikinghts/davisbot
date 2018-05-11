@@ -1,0 +1,75 @@
+//~ Build initialization -------------------------------------------------------------------------
+
+/**
+ * Defines the build script dependencies
+ *
+ * Note: Buildscript dependencies should be registered seperately from the regular dependencies
+ * block. Make sure not to mix them up. Check out the builderplugin project for plugin
+ * development at: https://bitbucket.org/planonsoftware/builderplugin/overview
+ */
+buildscript { scriptHandler ->
+    apply from: '../assembly/shared/builder.gradle'
+    configureBuilder(scriptHandler)
+}
+
+//~ Configuration --------------------------------------------------------------------------------
+plugins {
+  id "com.moowork.node" version "1.1.0"
+}
+
+node {
+  // Version of node to use.
+  version = '6.9.1'
+
+  // Version of Yarn to use.
+  yarnVersion = '0.24.6'
+
+  // If true, it will download node using above parameters.
+  // If false, it will try to use globally installed node.
+  download = true
+
+  // Set the work directory for unpacking node
+  workDir = file("${project.buildDir}/nodejs")
+}
+
+apply plugin: nl.planon.builder.project.ProjectPlugin
+
+configurations {
+  awsdistribution
+}
+
+sonarqube {
+    properties {
+            property "sonar.sources", "./src"
+            property "sonar.javascript.lcov.reportPaths", "coverage/lcov.info"
+    }
+}
+
+task createAWSDistribution(type: Zip) {
+  group 'Build'
+  description 'Creates the AWS compatible ZIP distribution for this lambda'
+
+  fileMode = 0755
+  from "${projectDir}/src"
+  include 'index.js'
+}
+
+artifacts {
+  awsdistribution createAWSDistribution
+}
+
+centralBuild.dependsOn createAWSDistribution
+
+
+task installNpm(type: NpmTask) {
+  // install the express package only
+  args = ['install']
+}
+
+
+task testJs(type: NpmTask,dependsOn: "installNpm") {
+  // install the express package only
+  args = ['run','coverage']
+}
+
+tasks['sonarqube'].dependsOn('testJs')
