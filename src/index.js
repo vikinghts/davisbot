@@ -81,7 +81,7 @@ async function amazonLamdbaRunner() {
       return await sqs.receiveMessage(params).promise(); 
     }
 
-    async function handleBody(body) {
+    async function handleCommands(body) {
       switch(body.payload.text) {
         case 'cockpit':
             var sqs = await getsqs();
@@ -103,25 +103,26 @@ async function amazonLamdbaRunner() {
       var body = JSON.parse(event.body);
       var eventtype = body.type;
       if ((eventtype === "override") && (body.event  === "fullTextInterception")) {   
-        var repsonseMadeFromBody = await handleBody(body);
+        var repsonseFromCommands = await handleCommands(body);
         return callback (null, {
           statusCode: 200,
           body: JSON.stringify({
             delegate: false,
             confirmation: false,
-            response: repsonseMadeFromBody
+            response: repsonseFromCommands
           })
         });      
       }
     }
     catch(error) {
       console.log("ERROR : " + error)
+      return callback ('{"text": "'+ error + '"}',null);
     }
   }
 
-  var callbackkris = await exportsHandlerFunctionInAwsLambda(event ,"context",fakeAmazonCallaback);
+  var callbackkris = await exportsHandlerFunctionInAwsLambda(event ,"context",testCallaback);
 
-  function fakeAmazonCallaback(error,repsonse) {
+  function testCallaback(error,repsonse) {
     if (error != null) {
       console.log("error  :" + error);  
     }
