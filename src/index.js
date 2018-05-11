@@ -81,8 +81,8 @@ async function amazonLamdbaRunner() {
       return await sqs.receiveMessage(params).promise(); 
     }
 
-    async function handleCommands(body) {
-      switch(body.payload.text) {
+    async function handleCommands(payload) {
+      switch(payload.text) {
         case 'cockpit':
             var sqs = await getsqs();
             var body = JSON.parse(sqs.Messages[0].Body);   
@@ -103,7 +103,7 @@ async function amazonLamdbaRunner() {
       var body = JSON.parse(event.body);
       var eventtype = body.type;
       if ((eventtype === "override") && (body.event  === "fullTextInterception")) {   
-        var repsonseFromCommands = await handleCommands(body);
+        var repsonseFromCommands = await handleCommands(body.payload);
         return callback (null, {
           statusCode: 200,
           body: JSON.stringify({
@@ -120,7 +120,7 @@ async function amazonLamdbaRunner() {
     }
   }
 
-  var callbackkris = await exportsHandlerFunctionInAwsLambda(event ,"context",testCallaback);
+  await exportsHandlerFunctionInAwsLambda(event ,"context",testCallaback);
 
   function testCallaback(error,repsonse) {
     if (error != null) {

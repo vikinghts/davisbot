@@ -7,14 +7,17 @@
  * block. Make sure not to mix them up. Check out the builderplugin project for plugin
  * development at: https://bitbucket.org/planonsoftware/builderplugin/overview
  */
+/*
 buildscript { scriptHandler ->
     apply from: '../assembly/shared/builder.gradle'
     configureBuilder(scriptHandler)
 }
+*/
 
 //~ Configuration --------------------------------------------------------------------------------
 plugins {
   id "com.moowork.node" version "1.1.0"
+  id "org.sonarqube" version "2.6.2"
 }
 
 node {
@@ -32,7 +35,7 @@ node {
   workDir = file("${project.buildDir}/nodejs")
 }
 
-apply plugin: nl.planon.builder.project.ProjectPlugin
+//apply plugin: nl.planon.builder.project.ProjectPlugin
 
 configurations {
   awsdistribution
@@ -58,7 +61,7 @@ artifacts {
   awsdistribution createAWSDistribution
 }
 
-centralBuild.dependsOn createAWSDistribution
+//centralBuild.dependsOn createAWSDistribution
 
 
 task installNpm(type: NpmTask) {
